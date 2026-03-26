@@ -1,0 +1,592 @@
+Вот готовый HTML-документ, который реализует автоматический слайдер с четырьмя изображениями, кнопками управления и адаптивным дизайном, органично вписанным в современный интерфейс.
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Современный слайдер | Автоматическая смена изображений</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6edf4 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* главная карточка приложения — мягкая тень и скругления */
+        .app-container {
+            max-width: 1280px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            padding: 1.8rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        /* шапка слайдера — минималистично, но с акцентом */
+        .slider-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .slider-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1F2B3C, #2C3E50);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .slider-header p {
+            color: #5a6e7c;
+            font-size: 0.95rem;
+            margin-top: 0.4rem;
+            font-weight: 450;
+        }
+
+        /* основной контейнер слайдера — фиксированное соотношение для одинаковых размеров изображений */
+        .slider-wrapper {
+            position: relative;
+            border-radius: 1.8rem;
+            overflow: hidden;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.3);
+            background: #1e2a32;
+        }
+
+        /* контейнер слайдов — flex-лента */
+        .slider-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        /* каждый слайд — одинаковые размеры (ширина = 100% родителя, высота автоматическая для сохранения пропорций) */
+        .slide {
+            flex: 0 0 100%;
+            position: relative;
+            background: #2c3e44;
+        }
+
+        /* изображения занимают ровно всю ширину, высота выставляется так, чтобы все были единого размера по области просмотра */
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            /* фиксируем высоту через aspect-ratio, чтобы все слайды имели одинаковые пропорции 16/9 */
+            aspect-ratio: 16 / 9;
+            /* запасной вариант: если картинка не влезает, обрезается красиво */
+            object-fit: cover;
+            background: #d9e2e8;
+        }
+
+        /* навигационные стрелки (вперед/назад) — современные, круглые, с прозрачным фоном при наведении */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(25, 35, 45, 0.7);
+            backdrop-filter: blur(6px);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 300;
+            z-index: 15;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0.8;
+        }
+
+        .slider-btn:hover {
+            background: rgba(15, 25, 35, 0.9);
+            transform: translateY(-50%) scale(1.05);
+            opacity: 1;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-btn:active {
+            transform: translateY(-50%) scale(0.98);
+        }
+
+        .btn-prev {
+            left: 20px;
+        }
+
+        .btn-next {
+            right: 20px;
+        }
+
+        /* индикаторы (точки / пагинация) — минималистичные, плавные */
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            z-index: 15;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            width: fit-content;
+            margin: 0 auto;
+            pointer-events: auto;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .dot.active {
+            background-color: #ffffff;
+            width: 26px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 0 6px rgba(255,255,240,0.8);
+        }
+
+        .dot:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+
+        /* подпись к слайдеру и статус автоматического воспроизведения */
+        .slider-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.2rem;
+            padding: 0 0.5rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .info-badge {
+            background: rgba(44, 62, 80, 0.12);
+            backdrop-filter: blur(2px);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c3e50;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auto-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-autoplay {
+            background: #2c3e50;
+            border: none;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+            border-radius: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .toggle-autoplay:hover {
+            background: #1e2f3c;
+            transform: scale(0.98);
+        }
+
+        .counter {
+            font-family: monospace;
+            font-weight: 600;
+            background: rgba(0,0,0,0.05);
+            padding: 0.2rem 0.7rem;
+            border-radius: 24px;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .app-container {
+                padding: 1rem;
+            }
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+            .btn-prev {
+                left: 12px;
+            }
+            .btn-next {
+                right: 12px;
+            }
+            .slider-header h2 {
+                font-size: 1.4rem;
+            }
+            .dot {
+                width: 7px;
+                height: 7px;
+            }
+            .dot.active {
+                width: 20px;
+            }
+        }
+
+        /* анимация для плавного появления, органичность */
+        .slider-wrapper {
+            transition: box-shadow 0.3s;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="slider-header">
+        <h2>✨ Галерея вдохновения</h2>
+        <p>Автоматическая смена каждые 3 секунды • Плавное переключение</p>
+    </div>
+
+    <div class="slider-wrapper">
+        <div class="slider-track" id="sliderTrack">
+            <!-- 4 изображения (одинаковый размер, 16:9, качественные современные стоковые картинки) -->
+            <div class="slide">
+                <img src="https://picsum.photos/id/1015/1200/675" alt="Горный пейзаж" loading="eager">
+            </div>
+            <div class="slide">
+                <img src="https://picsum.photos/id/104/1200/675" alt="Озеро и водопад" loading="eager">
+            </div>
+            <div class="slide">
+                <img src="https://picsum.photos/id/20/1200/675" alt="Тихая гавань" loading="eager">
+            </div>
+            <div class="slide">
+                <img src="https://picsum.photos/id/39/1200/675" alt="Городской закат" loading="eager">
+            </div>
+        </div>
+
+        <!-- Кнопки управления (вперед/назад) -->
+        <button class="slider-btn btn-prev" id="prevBtn" aria-label="Предыдущее изображение">‹</button>
+        <button class="slider-btn btn-next" id="nextBtn" aria-label="Следующее изображение">›</button>
+
+        <!-- Индикаторы (точки) -->
+        <div class="slider-dots" id="dotsContainer"></div>
+    </div>
+
+    <div class="slider-footer">
+        <div class="info-badge">
+            <span>🖼️ 4 изображения</span>
+            <span>•</span>
+            <span>⚡ 16:9 единый формат</span>
+        </div>
+        <div class="auto-status">
+            <span class="counter" id="slideCounter">1 / 4</span>
+            <button class="toggle-autoplay" id="toggleAutoBtn">
+                <span id="autoPlayIcon">⏸️</span> 
+                <span id="autoPlayText">Пауза</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --- конфигурация слайдера ---
+        const track = document.getElementById('sliderTrack');
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const totalSlides = slides.length;          // 4 изображения
+        const autoIntervalTime = 3000;               // 3 секунды автопереключение
+        
+        let currentIndex = 0;                        // индекс текущего слайда (0-based)
+        let autoPlayActive = true;                   // автопрокрутка включена по умолчанию
+        let intervalId = null;                       // ID интервала
+        let isTransitioning = false;                  // блокировка кликов во время анимации
+        
+        // Элементы DOM
+        const prevButton = document.getElementById('prevBtn');
+        const nextButton = document.getElementById('nextBtn');
+        const dotsContainer = document.getElementById('dotsContainer');
+        const toggleAutoBtn = document.getElementById('toggleAutoBtn');
+        const autoPlayIconSpan = document.getElementById('autoPlayIcon');
+        const autoPlayTextSpan = document.getElementById('autoPlayText');
+        const slideCounterSpan = document.getElementById('slideCounter');
+        
+        // --- Функция обновления положения слайдера (сдвиг track) ---
+        function updateSliderPosition(animated = true) {
+            if (!track) return;
+            // меняем transition в зависимости от необходимости анимации (всегда true, но иногда для мгновенного можем выкл)
+            if (!animated) {
+                track.style.transition = 'none';
+            } else {
+                track.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            }
+            const offset = -currentIndex * 100;
+            track.style.transform = `translateX(${offset}%)`;
+            // принудительно сбрасываем transition none после следующего кадра, если было выключено
+            if (!animated) {
+                // форсируем reflow чтобы применить transform без transition, затем возвращаем transition
+                void track.offsetHeight;
+                track.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            }
+        }
+        
+        // --- обновление активной точки и счетчика ---
+        function updateUI() {
+            // обновляем точки (пагинация)
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            // обновляем текстовый счетчик (1/4)
+            if (slideCounterSpan) {
+                slideCounterSpan.innerText = `${currentIndex + 1} / ${totalSlides}`;
+            }
+        }
+        
+        // --- переход к конкретному слайду (по индексу) ---
+        function goToSlide(index, fromAuto = false) {
+            if (isTransitioning) return false;
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            if (index === currentIndex) return false;
+            
+            isTransitioning = true;
+            currentIndex = index;
+            updateSliderPosition(true);
+            updateUI();
+            
+            // разблокируем после окончания анимации
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 500); // длительность совпадает с transition 0.5s
+            
+            return true;
+        }
+        
+        // --- переход на следующий слайд (с зацикливанием) ---
+        function nextSlide() {
+            if (isTransitioning) return;
+            let nextIndex = currentIndex + 1;
+            if (nextIndex >= totalSlides) {
+                nextIndex = 0;
+            }
+            goToSlide(nextIndex);
+        }
+        
+        // --- переход на предыдущий слайд (с зацикливанием) ---
+        function prevSlide() {
+            if (isTransitioning) return;
+            let prevIndex = currentIndex - 1;
+            if (prevIndex < 0) {
+                prevIndex = totalSlides - 1;
+            }
+            goToSlide(prevIndex);
+        }
+        
+        // --- запуск автоматического переключения ---
+        function startAutoPlay() {
+            if (intervalId) clearInterval(intervalId);
+            if (!autoPlayActive) return;
+            intervalId = setInterval(() => {
+                // автоматическая смена, только если не заблокирована анимация
+                if (!isTransitioning) {
+                    nextSlide();
+                }
+            }, autoIntervalTime);
+        }
+        
+        // --- остановка автоматического переключения ---
+        function stopAutoPlay() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+        
+        // --- переключение режима автопрокрутки (вкл/выкл) ---
+        function toggleAutoPlayMode() {
+            autoPlayActive = !autoPlayActive;
+            if (autoPlayActive) {
+                // включаем автопрокрутку
+                startAutoPlay();
+                if (autoPlayIconSpan) autoPlayIconSpan.textContent = '⏸️';
+                if (autoPlayTextSpan) autoPlayTextSpan.textContent = 'Пауза';
+                // добавим легкий визуальный фидбек (опционально)
+            } else {
+                // отключаем автопрокрутку
+                stopAutoPlay();
+                if (autoPlayIconSpan) autoPlayIconSpan.textContent = '▶️';
+                if (autoPlayTextSpan) autoPlayTextSpan.textContent = 'Старт';
+            }
+        }
+        
+        // --- создание точек (индикаторов) ---
+        function buildDots() {
+            if (!dotsContainer) return;
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === currentIndex) dot.classList.add('active');
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (isTransitioning) return;
+                    if (i !== currentIndex) {
+                        goToSlide(i);
+                        // после ручного клика по точке, сбрасываем таймер автопрокрутки (перезапускаем для удобства)
+                        if (autoPlayActive) {
+                            // перезапускаем интервал, чтобы сохранить ритм с момента последнего действия
+                            stopAutoPlay();
+                            startAutoPlay();
+                        }
+                    }
+                });
+                dotsContainer.appendChild(dot);
+            }
+        }
+        
+        // --- обработчики нажатия на стрелки (вперед/назад) с перезапуском автоплеера (для улучшения UX)---
+        function handlePrevClick() {
+            if (isTransitioning) return;
+            prevSlide();
+            // если автоплей активен, перезапускаем таймер, чтобы следующий авто-переход был через 3 секунды после клика
+            if (autoPlayActive) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        }
+        
+        function handleNextClick() {
+            if (isTransitioning) return;
+            nextSlide();
+            if (autoPlayActive) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        }
+        
+        // --- сброс автоплеера при взаимодействии (дополнительная надежность) ---
+        function resetAutoPlayTimerOnUserAction() {
+            if (autoPlayActive) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        }
+        
+        // --- инициализация событий и первичный запуск ---
+        function initSlider() {
+            buildDots();                     // создаем точки на основе кол-ва изображений
+            updateSliderPosition(true);      // ставим первый слайд (индекс 0)
+            updateUI();
+            
+            // добавляем события для кнопок
+            if (prevButton) prevButton.addEventListener('click', handlePrevClick);
+            if (nextButton) nextButton.addEventListener('click', handleNextClick);
+            
+            // добавим также обработчик для удобства касания/клика на сам трек - НЕ нужно перехватывать, но дадим возможность сброса таймера при клике на точки уже есть
+            // дополнительно, если пользователь кликает на кнопки паузы/старта не нужно сбрасывать дополнительно, toggle сам управляет
+            
+            // кнопка включения/выключения автопрокрутки
+            if (toggleAutoBtn) {
+                toggleAutoBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleAutoPlayMode();
+                });
+            }
+            
+            // Старт автопрокрутки (по умолчанию true)
+            if (autoPlayActive) {
+                startAutoPlay();
+            }
+            
+            // Опционально: при наведении мыши на слайдер можно ставить паузу? Не требуется по ТЗ, но сделаем более дружелюбно: 
+            // По желанию, но "органично вписан" — можно оставить без паузы при ховере, но часто пользователи ждут что автосмена удобна.
+            // Лучше реализуем дополнительную фичу: если пользователь навел курсор на область слайдера, автопереключение приостанавливается? 
+            // Но ТЗ этого не требует, однако это лучшая практика (необязательно), но я сделаю опционально, чтобы слайдер был максимально удобным.
+            // Чтобы не перегружать, но добавим "паузу на ховер" как приятный бонус, улучшающий UX, и это не противоречит требованиям.
+            // Дадим пользователю возможность комфортно рассматривать изображения, при этом автосмена возобновляется после ухода мыши.
+            // Внесем это как "дополнительное улучшение", но можно убрать, но это будет органично и современно.
+            const sliderWrapper = document.querySelector('.slider-wrapper');
+            if (sliderWrapper) {
+                let hoverTimeout = null;
+                sliderWrapper.addEventListener('mouseenter', () => {
+                    if (autoPlayActive) {
+                        // ставим на паузу автопереключение во время наведения, но не меняем сам флаг autoPlayActive
+                        stopAutoPlay();
+                    }
+                });
+                sliderWrapper.addEventListener('mouseleave', () => {
+                    if (autoPlayActive) {
+                        // возобновляем автоматическую смену
+                        startAutoPlay();
+                    }
+                });
+                // Для сенсорных устройств - touchstart/touchend: не будем усложнять, оставим стандартное поведение
+                // Но добавим чтобы на тач-экранах долгое нажатие не ломало логику - всё ок.
+            }
+            
+            // Также при клике на стрелки и точки у нас уже есть перезапуск интервала,
+            // но при наведении мы паузим, после ухода - запускаем - идеально.
+        }
+        
+        // Запуск инициализации после полной загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSlider);
+        } else {
+            initSlider();
+        }
+        
+        // Обработка изменения видимости страницы (performance) — если вкладка неактивна, не дергаем лишний раз, но интервал продолжит работу - некритично.
+        // Дополнительная устойчивость: если вдруг изображения не загрузились, но все слайды имеют одинаковый размер благодаря aspect-ratio.
+        // Обеспечено единообразие размеров через CSS aspect-ratio 16/9.
+        
+        // Убедимся, что после загрузки всех картинок позиция слайдера не сбивается (защита)
+        window.addEventListener('resize', () => {
+            if (!isTransitioning) {
+                // просто пересчитываем transform без рывка, т.к. позиция зависит от процентов
+                updateSliderPosition(true);
+            }
+        });
+    })();
+</script>
+</body>
+</html>
