@@ -365,42 +365,42 @@
             }
         }
         
-        // --- обновление активной точки и счетчика ---
-        function updateUI() {
-            // обновляем точки (пагинация)
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach((dot, idx) => {
-                if (idx === currentIndex) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
-            // обновляем текстовый счетчик (1/4)
-            if (slideCounterSpan) {
-                slideCounterSpan.innerText = `${currentIndex + 1} / ${totalSlides}`;
-            }
-        }
+        // // --- обновление активной точки и счетчика ---
+        // function updateUI() {
+        //     // обновляем точки (пагинация)
+        //     const dots = document.querySelectorAll('.dot');
+        //     dots.forEach((dot, idx) => {
+        //         if (idx === currentIndex) {
+        //             dot.classList.add('active');
+        //         } else {
+        //             dot.classList.remove('active');
+        //         }
+        //     });
+        //     // обновляем текстовый счетчик (1/4)
+        //     if (slideCounterSpan) {
+        //         slideCounterSpan.innerText = `${currentIndex + 1} / ${totalSlides}`;
+        //     }
+        // }
         
-        // --- переход к конкретному слайду (по индексу) ---
-        function goToSlide(index, fromAuto = false) {
-            if (isTransitioning) return false;
-            if (index < 0) index = 0;
-            if (index >= totalSlides) index = totalSlides - 1;
-            if (index === currentIndex) return false;
+        // // --- переход к конкретному слайду (по индексу) ---
+        // function goToSlide(index, fromAuto = false) {
+        //     if (isTransitioning) return false;
+        //     if (index < 0) index = 0;
+        //     if (index >= totalSlides) index = totalSlides - 1;
+        //     if (index === currentIndex) return false;
             
-            isTransitioning = true;
-            currentIndex = index;
-            updateSliderPosition(true);
-            updateUI();
+        //     isTransitioning = true;
+        //     currentIndex = index;
+        //     updateSliderPosition(true);
+        //     updateUI();
             
-            // разблокируем после окончания анимации
-            setTimeout(() => {
-                isTransitioning = false;
-            }, 500); // длительность совпадает с transition 0.5s
+        //     // разблокируем после окончания анимации
+        //     setTimeout(() => {
+        //         isTransitioning = false;
+        //     }, 500); // длительность совпадает с transition 0.5s
             
-            return true;
-        }
+        //     return true;
+        // }
         
         // --- переход на следующий слайд (с зацикливанием) ---
         function nextSlide() {
