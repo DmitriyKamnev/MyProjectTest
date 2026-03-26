@@ -1,1 +1,3 @@
-Всем привет!
+All hello!
+
+All bye!
